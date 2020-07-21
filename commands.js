@@ -1,6 +1,33 @@
 const Rcon = require("modern-rcon");
 const database = require("./database");
 const rcon = new Rcon(process.env.RCON_HOST, process.env.RCON_PASS);
+const config = require("./config");
+
+const createRole = (guild) => {
+  return guild.roles.create({
+    data: {
+      name: config.role,
+      color: "GREEN",
+    },
+    reason: "Create role for minecraft players"
+  })
+}
+
+const getRole = (guild) => {
+  return guild.roles.fetch()
+    .then(roles => {
+      const role = roles.cache.find((role) => role.name === config.role);
+      return role || createRole(guild);
+    })
+    .catch(console.error);
+};
+
+const appendRole = async (member, guild) => {
+  if (config.role) {
+    const role = await getRole(guild);
+    if (role) member.roles.add(role);
+  }
+};
 
 module.exports = {
   add: async (message, alias) => {
@@ -10,6 +37,7 @@ module.exports = {
       message.channel.send('Пользователь с таким именем уже был добавлен');
     } else {
       const discordId = message.author.id;
+      await appendRole(message.member, message.guild);
       const prevAlias = await database.getAlias(discordId);
       if (prevAlias) {
         message.channel.send(`Удаляю предыдущий никнейм ${prevAlias}`);
@@ -20,7 +48,7 @@ module.exports = {
           if (prevAlias) {
             return rcon.send(`easywl remove ${prevAlias}`);
           } else {
-            return new Promise(() => "");
+            return "";
           }
         })
         .then(() => {
