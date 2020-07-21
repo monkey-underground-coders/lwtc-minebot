@@ -3,21 +3,21 @@ const database = require("./database");
 const rcon = new Rcon(process.env.RCON_HOST, process.env.RCON_PASS);
 const config = require("./config");
 
+const createRole = (guild) => {
+  return guild.roles.create({
+    data: {
+      name: config.role,
+      color: "GREEN",
+    },
+    reason: "Create role for minecraft players"
+  })
+}
+
 const getRole = (guild) => {
   return guild.roles.fetch()
     .then(roles => {
-      let role = roles.cache.find((role) => role.name === config.role);
-      if (!role) {
-        return guild.roles.create({
-          data: {
-            name: config.role,
-            color: "GREEN",
-          },
-          reason: "Create role for minecraft players"
-        })
-      } else {
-        return role;
-      }
+      const role = roles.cache.find((role) => role.name === config.role);
+      return role || createRole(guild);
     })
     .catch(console.error);
 };
