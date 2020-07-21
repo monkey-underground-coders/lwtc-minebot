@@ -4,7 +4,7 @@ const chalk = require("chalk");
 const Discord = require("discord.js");
 const config = require("./config");
 const commands = require("./commands");
-const { commandsInfo } = require("./constants");
+const {commandsInfo} = require("./constants");
 const client = new Discord.Client();
 
 const isDotenvPropertyPresented = (property) =>
@@ -49,11 +49,7 @@ const init = (() => {
         );
       }
 
-      const response = await commands[cmd](alias, rest);
-
-      if (response.hasOwnProperty("message")) {
-        message.reply(response.message);
-      }
+      await commands[cmd](message, alias, rest);
     });
 
   client.login(process.env.DS_TOKEN);
